@@ -9,4 +9,4 @@ inputImage.addEventListener('load', () => {
 
   let outputCanvas = document.querySelector('#output');
   outputCanvas.getContext('2d').putImageData(hough(inputData, outputCanvas), 0, 0);
-});
+}, false);

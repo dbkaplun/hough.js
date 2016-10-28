@@ -1,7 +1,10 @@
 export const BANDWIDTH = 255;
+export const DEFAULT_THRESHOLD = .5;
 
 // Translated from https://rosettacode.org/wiki/Hough_transform#Python
-export default function hough (input, outputSize, threshold=.5) {
+export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
+  if (typeof threshold === 'number') threshold = thresholdByBrightness(threshold);
+
   let {width, height, data} = input;
 
   let outputWidth = outputSize.width;
@@ -19,9 +22,7 @@ export default function hough (input, outputSize, threshold=.5) {
   for (let inputY = 0; inputY < height; inputY++) {
     for (let inputX = 0; inputX < width; inputX++) {
       let inputI = xyToIndex(input, inputX, inputY);
-      let [r, g, b, a] = input.data.slice(inputI, inputI+4);
-      let brightness = (r+g+b)/(3*BANDWIDTH) * (a/BANDWIDTH);
-      if (brightness > threshold) continue;
+      if (threshold(...input.data.slice(inputI, inputI+4))) continue;
       for (let outputX = 0; outputX < outputWidth; outputX++) {
         let th = dTh*outputX;
         let rho = inputX*Math.cos(th) + inputY*Math.sin(th);
@@ -36,6 +37,14 @@ export default function hough (input, outputSize, threshold=.5) {
   }
 
   return output;
+};
+
+export function thresholdByBrightness (threshold) {
+  return (...args) => brightness(...args) > threshold;
+};
+
+export function brightness (r, g, b, a) {
+  return (r+g+b)/(3*BANDWIDTH) * (a/BANDWIDTH);
 };
 
 export function xyToIndex ({width}, x, y) {

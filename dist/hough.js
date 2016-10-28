@@ -3,18 +3,24 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 exports.default = hough;
+exports.thresholdByBrightness = thresholdByBrightness;
+exports.brightness = brightness;
 exports.xyToIndex = xyToIndex;
 exports.defaultCanvasFactory = defaultCanvasFactory;
 exports.setCanvasFactory = setCanvasFactory;
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var BANDWIDTH = exports.BANDWIDTH = 255;
+var DEFAULT_THRESHOLD = exports.DEFAULT_THRESHOLD = .5;
 
 // Translated from https://rosettacode.org/wiki/Hough_transform#Python
 function hough(input, outputSize) {
-  var threshold = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : .5;
+  var threshold = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEFAULT_THRESHOLD;
+
+  if (typeof threshold === 'number') threshold = thresholdByBrightness(threshold);
+
   var width = input.width,
       height = input.height,
       data = input.data;
@@ -35,16 +41,7 @@ function hough(input, outputSize) {
   for (var inputY = 0; inputY < height; inputY++) {
     for (var inputX = 0; inputX < width; inputX++) {
       var inputI = xyToIndex(input, inputX, inputY);
-
-      var _input$data$slice = input.data.slice(inputI, inputI + 4),
-          _input$data$slice2 = _slicedToArray(_input$data$slice, 4),
-          r = _input$data$slice2[0],
-          g = _input$data$slice2[1],
-          b = _input$data$slice2[2],
-          a = _input$data$slice2[3];
-
-      var brightness = (r + g + b) / (3 * BANDWIDTH) * (a / BANDWIDTH);
-      if (brightness > threshold) continue;
+      if (threshold.apply(undefined, _toConsumableArray(input.data.slice(inputI, inputI + 4)))) continue;
       for (var outputX = 0; outputX < outputWidth; outputX++) {
         var th = dTh * outputX;
         var rho = inputX * Math.cos(th) + inputY * Math.sin(th);
@@ -59,6 +56,16 @@ function hough(input, outputSize) {
   }
 
   return output;
+};
+
+function thresholdByBrightness(threshold) {
+  return function () {
+    return brightness.apply(undefined, arguments) > threshold;
+  };
+};
+
+function brightness(r, g, b, a) {
+  return (r + g + b) / (3 * BANDWIDTH) * (a / BANDWIDTH);
 };
 
 function xyToIndex(_ref, x, y) {

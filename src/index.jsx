@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import hough, {xyToRhoTheta, newCanvas} from '..';
 import _ from 'lodash';
 
-const houghImageMem = _.memoize((image, ...args) => {
+export const houghImageMem = _.memoize((image, ...args) => {
   let {width, height} = image;
   let tmpCtx = newCanvas(width, height).getContext('2d');
   tmpCtx.drawImage(image, 0, 0, width, height);
   return hough(tmpCtx.getImageData(0, 0, width, height), ...args);
 });
 
-function newImage (opts) {
+export function newImage (opts) {
   return new Promise((resolve, reject) => {
     let img = _.merge(new Image(), opts);
     img.addEventListener('load', ()=>resolve(img), true);
@@ -18,7 +18,7 @@ function newImage (opts) {
   });
 }
 
-function getOffset (evt) {
+export function getOffset (evt) {
   let el = evt.target,
       x = 0,
       y = 0;
@@ -35,14 +35,14 @@ function getOffset (evt) {
   return {x, y};
 }
 
-function clearCanvas (canvas, fillStyle, ctx=canvas.getContext('2d')) {
+export function clearCanvas (canvas, fillStyle, ctx=canvas.getContext('2d')) {
   let oldFillStyle = ctx.fillStyle;
   ctx.fillStyle = fillStyle;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = oldFillStyle;
 };
 
-const DemoHough = React.createClass({
+export const DemoHough = React.createClass({
   getInitialState () {
     return {
       input: 'test/data/rosettacode-pentagon/input.png',
@@ -112,4 +112,6 @@ const DemoHough = React.createClass({
   }
 });
 
-global.demoHough = ReactDOM.render(<DemoHough />, document.querySelector('#demo-hough'));
+export const demoHough = ReactDOM.render(<DemoHough />, document.querySelector('#demo-hough'));
+
+global.demoHough = demoHough;

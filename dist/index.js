@@ -46,6 +46,14 @@
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.demoHough = exports.DemoHough = exports.houghImageMem = undefined;
+	exports.newImage = newImage;
+	exports.getOffset = getOffset;
+	exports.clearCanvas = clearCanvas;
+
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
@@ -66,7 +74,7 @@
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	var houghImageMem = _lodash2.default.memoize(function (image) {
+	var houghImageMem = exports.houghImageMem = _lodash2.default.memoize(function (image) {
 	  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	    args[_key - 1] = arguments[_key];
 	  }
@@ -115,7 +123,7 @@
 	  ctx.fillStyle = oldFillStyle;
 	};
 
-	var DemoHough = _react2.default.createClass({
+	var DemoHough = exports.DemoHough = _react2.default.createClass({
 	  displayName: 'DemoHough',
 	  getInitialState: function getInitialState() {
 	    return {
@@ -232,7 +240,9 @@
 	  }
 	});
 
-	global.demoHough = _reactDom2.default.render(_react2.default.createElement(DemoHough, null), document.querySelector('#demo-hough'));
+	var demoHough = exports.demoHough = _reactDom2.default.render(_react2.default.createElement(DemoHough, null), document.querySelector('#demo-hough'));
+
+	global.demoHough = demoHough;
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },

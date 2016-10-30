@@ -52,7 +52,6 @@
 	exports.demoHough = exports.DemoHough = exports.houghImageMem = undefined;
 	exports.newImage = newImage;
 	exports.getOffset = getOffset;
-	exports.clearCanvas = clearCanvas;
 
 	var _react = __webpack_require__(1);
 
@@ -95,7 +94,7 @@
 	    }, true);
 	    img.addEventListener('error', reject, true);
 	  });
-	}
+	};
 
 	function getOffset(evt) {
 	  var el = evt.target,
@@ -112,15 +111,6 @@
 	  y = evt.clientY - y;
 
 	  return { x: x, y: y };
-	}
-
-	function clearCanvas(canvas, fillStyle) {
-	  var ctx = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : canvas.getContext('2d');
-
-	  var oldFillStyle = ctx.fillStyle;
-	  ctx.fillStyle = fillStyle;
-	  ctx.clearRect(0, 0, canvas.width, canvas.height);
-	  ctx.fillStyle = oldFillStyle;
 	};
 
 	var DemoHough = exports.DemoHough = _react2.default.createClass({
@@ -132,18 +122,6 @@
 	      houghArgs: []
 	    };
 	  },
-	  componentDidMount: function componentDidMount() {
-	    this.setInputImage();
-	  },
-	  setInputImage: function setInputImage() {
-	    var _this = this;
-
-	    var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { src: this.state.input };
-
-	    return newImage(opts).then(function (inputImage) {
-	      _this.setState({ inputImage: inputImage });
-	    }).catch(console.error);
-	  },
 	  onOutputMouseMove: function onOutputMouseMove(evt) {
 	    this.setState({ mouse: getOffset(evt) });
 	  },
@@ -153,26 +131,23 @@
 	  renderCanvas: function renderCanvas() {
 	    var _refs = this.refs,
 	        input = _refs.input,
+	        lines = _refs.lines,
 	        output = _refs.output;
 
-	    if (!input || !output) return;
-	    var inputCtx = input.getContext('2d');
+	    if (!input) return;
+	    var linesCtx = lines.getContext('2d');
 	    var outputCtx = output.getContext('2d');
-	    clearCanvas(input, 'white', inputCtx);
-	    clearCanvas(output, 'white', outputCtx);
+	    linesCtx.clearRect(0, 0, lines.width, lines.height);
+	    outputCtx.clearRect(0, 0, output.width, output.height);
 
 	    var _state = this.state,
-	        inputImage = _state.inputImage,
 	        outputSize = _state.outputSize,
 	        houghArgs = _state.houghArgs;
+	    var width = input.width,
+	        height = input.height;
 
-	    if (!inputImage) return;
-	    var width = inputImage.width,
-	        height = inputImage.height;
-
-	    _lodash2.default.merge(input, { width: width, height: height });
-	    inputCtx.drawImage(inputImage, 0, 0);
-	    var houghed = houghImageMem.apply(undefined, [inputImage, outputSize].concat(_toConsumableArray(houghArgs)));
+	    _lodash2.default.merge(lines, { width: width, height: height });
+	    var houghed = houghImageMem.apply(undefined, [input, outputSize].concat(_toConsumableArray(houghArgs)));
 	    outputCtx.putImageData(houghed, 0, 0);
 
 	    var mouse = this.state.mouse;
@@ -188,17 +163,15 @@
 	    // solve for moveTo/lineTo coords at x = 0 and x = width
 
 
-	    inputCtx.beginPath();
-	    inputCtx.moveTo(0, rho / Math.sin(th));
-	    inputCtx.lineTo(width, (rho - width * Math.cos(th)) / Math.sin(th));
-	    inputCtx.stroke();
+	    linesCtx.beginPath();
+	    linesCtx.moveTo(0, rho / Math.sin(th));
+	    linesCtx.lineTo(width, (rho - width * Math.cos(th)) / Math.sin(th));
+	    linesCtx.stroke();
 	  },
 	  render: function render() {
-	    var _state2 = this.state,
-	        inputImage = _state2.inputImage,
-	        _state2$outputSize = _state2.outputSize,
-	        width = _state2$outputSize.width,
-	        height = _state2$outputSize.height;
+	    var _state$outputSize = this.state.outputSize,
+	        width = _state$outputSize.width,
+	        height = _state$outputSize.height;
 
 	    _lodash2.default.defer(this.renderCanvas);
 	    return _react2.default.createElement(
@@ -223,9 +196,17 @@
 	        null,
 	        'Input'
 	      ),
-	      _react2.default.createElement('canvas', { ref: 'input',
-	        width: _lodash2.default.get(inputImage, 'width', 0),
-	        height: _lodash2.default.get(inputImage, 'height', 0) }),
+	      _react2.default.createElement(
+	        'div',
+	        { style: { position: 'relative' } },
+	        _react2.default.createElement('img', { ref: 'input',
+	          src: this.state.input,
+	          onLoad: this.renderCanvas }),
+	        _react2.default.createElement('canvas', { ref: 'lines',
+	          width: _lodash2.default.get(this.refs, 'input.width', 0),
+	          height: _lodash2.default.get(this.refs, 'input.height', 0),
+	          style: { position: 'absolute', top: 0, left: 0, pointerEvents: 'none' } })
+	      ),
 	      _react2.default.createElement(
 	        'h2',
 	        null,
@@ -21674,6 +21655,7 @@
 	}
 
 	var BANDWIDTH = exports.BANDWIDTH = 255;
+	var NUM_BANDS = exports.NUM_BANDS = 4;
 	var DEFAULT_THRESHOLD = exports.DEFAULT_THRESHOLD = .5;
 
 	// Translated from https://rosettacode.org/wiki/Hough_transform#Python
@@ -21700,7 +21682,7 @@
 	  for (var inputY = 0; inputY < height; inputY++) {
 	    for (var inputX = 0; inputX < width; inputX++) {
 	      var inputI = xyToIndex(input, inputX, inputY);
-	      if (threshold.apply(undefined, _toConsumableArray(input.data.slice(inputI, inputI + 4)))) continue;
+	      if (threshold.apply(undefined, _toConsumableArray(input.data.slice(inputI, inputI + NUM_BANDS)))) continue;
 	      for (var outputX = 0; outputX < outputWidth; outputX++) {
 	        var th = dTh * outputX;
 	        var rho = inputX * Math.cos(th) + inputY * Math.sin(th);
@@ -21746,7 +21728,7 @@
 	function xyToIndex(_ref2, x, y) {
 	  var width = _ref2.width;
 
-	  return (y * width + x) * 4;
+	  return (y * width + x) * NUM_BANDS;
 	};
 
 	function newCanvas() {

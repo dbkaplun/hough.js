@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 
 let config = {
@@ -15,7 +16,9 @@ let config = {
         loader: 'babel-loader',
       },
     ],
-    noParse: /canvas/,
   },
+  plugins: [
+    new webpack.IgnorePlugin(/^canvas$/),
+  ],
 };
 module.exports = config;

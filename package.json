@@ -1,6 +1,6 @@
 {
   "name": "hough.js",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Hough transform in JavaScript",
   "homepage": "https://github.com/dbkaplun/hough.js",
   "bugs": "https://github.com/dbkaplun/hough.js/issues",

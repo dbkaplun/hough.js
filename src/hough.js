@@ -9,7 +9,7 @@ export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
 
   let outputWidth = outputSize.width;
   let outputHeight = outputSize.height;
-  let dest = setCanvasFactory.canvasFactory(outputWidth, outputHeight);
+  let dest = newCanvas(outputWidth, outputHeight);
   let halfHeight = outputHeight / 2;
   let ctx = dest.getContext('2d');
   ctx.fillStyle = `rgba(${BANDWIDTH}, ${BANDWIDTH}, ${BANDWIDTH}, 1)`;
@@ -64,15 +64,18 @@ export function xyToIndex ({width}, x, y) {
   return (y*width + x)*4;
 };
 
-export function defaultCanvasFactory (width, height) {
-  if (typeof document !== 'undefined') {
-    return Object.assign(document.createElement('canvas'), {width, height});
-  } else {
-    const Canvas = require('canvas');
-    return new Canvas(...arguments);
-  }
+export function newCanvas () {
+  return newCanvas.factory.apply(this, arguments);
 };
-export function setCanvasFactory (fn) {
-  setCanvasFactory.canvasFactory = fn;
+newCanvas.BROWSER_FACTORY = (width, height) => Object.assign(document.createElement('canvas'), {width, height});
+newCanvas.NODE_FACTORY = function () {
+  let {Canvas} = newCanvas.NODE_FACTORY;
+  if (!Canvas) Canvas = newCanvas.NODE_FACTORY.Canvas = require('canvas');
+  return new Canvas(...arguments);
 };
-setCanvasFactory(defaultCanvasFactory);
+newCanvas.DEFAULT_FACTORY = function () {
+  return typeof document !== 'undefined'
+    ? newCanvas.BROWSER_FACTORY.apply(this, arguments)
+    : newCanvas.NODE_FACTORY.apply(this, arguments);
+};
+newCanvas.factory = newCanvas.DEFAULT_FACTORY;

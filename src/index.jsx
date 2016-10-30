@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import hough, {xyToRhoTheta, defaultCanvasFactory} from '..';
+import hough, {xyToRhoTheta, newCanvas} from '..';
 import _ from 'lodash';
 
 const houghImageMem = _.memoize((image, ...args) => {
   let {width, height} = image;
-  let tmpCtx = defaultCanvasFactory(width, height).getContext('2d');
+  let tmpCtx = newCanvas(width, height).getContext('2d');
   tmpCtx.drawImage(image, 0, 0, width, height);
   return hough(tmpCtx.getImageData(0, 0, width, height), ...args);
 });

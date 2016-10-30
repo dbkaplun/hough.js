@@ -74,7 +74,7 @@
 	  var width = image.width,
 	      height = image.height;
 
-	  var tmpCtx = (0, _2.defaultCanvasFactory)(width, height).getContext('2d');
+	  var tmpCtx = (0, _2.newCanvas)(width, height).getContext('2d');
 	  tmpCtx.drawImage(image, 0, 0, width, height);
 	  return _3.default.apply(undefined, [tmpCtx.getImageData(0, 0, width, height)].concat(args));
 	});
@@ -21652,8 +21652,7 @@
 	exports.thresholdByBrightness = thresholdByBrightness;
 	exports.brightness = brightness;
 	exports.xyToIndex = xyToIndex;
-	exports.defaultCanvasFactory = defaultCanvasFactory;
-	exports.setCanvasFactory = setCanvasFactory;
+	exports.newCanvas = newCanvas;
 
 	function _toConsumableArray(arr) {
 	  if (Array.isArray(arr)) {
@@ -21680,7 +21679,7 @@
 
 	  var outputWidth = outputSize.width;
 	  var outputHeight = outputSize.height;
-	  var dest = setCanvasFactory.canvasFactory(outputWidth, outputHeight);
+	  var dest = newCanvas(outputWidth, outputHeight);
 	  var halfHeight = outputHeight / 2;
 	  var ctx = dest.getContext('2d');
 	  ctx.fillStyle = 'rgba(' + BANDWIDTH + ', ' + BANDWIDTH + ', ' + BANDWIDTH + ', 1)';
@@ -21742,18 +21741,22 @@
 	  return (y * width + x) * 4;
 	};
 
-	function defaultCanvasFactory(width, height) {
-	  if (typeof document !== 'undefined') {
-	    return Object.assign(document.createElement('canvas'), { width: width, height: height });
-	  } else {
-	    var Canvas = __webpack_require__(173);
-	    return new (Function.prototype.bind.apply(Canvas, [null].concat(Array.prototype.slice.call(arguments))))();
-	  }
+	function newCanvas() {
+	  return newCanvas.factory.apply(this, arguments);
 	};
-	function setCanvasFactory(fn) {
-	  setCanvasFactory.canvasFactory = fn;
+	newCanvas.BROWSER_FACTORY = function (width, height) {
+	  return Object.assign(document.createElement('canvas'), { width: width, height: height });
 	};
-	setCanvasFactory(defaultCanvasFactory);
+	newCanvas.NODE_FACTORY = function () {
+	  var Canvas = newCanvas.NODE_FACTORY.Canvas;
+
+	  if (!Canvas) Canvas = newCanvas.NODE_FACTORY.Canvas = __webpack_require__(173);
+	  return new (Function.prototype.bind.apply(Canvas, [null].concat(Array.prototype.slice.call(arguments))))();
+	};
+	newCanvas.DEFAULT_FACTORY = function () {
+	  return typeof document !== 'undefined' ? newCanvas.BROWSER_FACTORY.apply(this, arguments) : newCanvas.NODE_FACTORY.apply(this, arguments);
+	};
+	newCanvas.factory = newCanvas.DEFAULT_FACTORY;
 
 /***/ },
 /* 173 */

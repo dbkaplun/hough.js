@@ -9,8 +9,7 @@ exports.getRhoMax = getRhoMax;
 exports.thresholdByBrightness = thresholdByBrightness;
 exports.brightness = brightness;
 exports.xyToIndex = xyToIndex;
-exports.defaultCanvasFactory = defaultCanvasFactory;
-exports.setCanvasFactory = setCanvasFactory;
+exports.newCanvas = newCanvas;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -30,7 +29,7 @@ function hough(input, outputSize) {
 
   var outputWidth = outputSize.width;
   var outputHeight = outputSize.height;
-  var dest = setCanvasFactory.canvasFactory(outputWidth, outputHeight);
+  var dest = newCanvas(outputWidth, outputHeight);
   var halfHeight = outputHeight / 2;
   var ctx = dest.getContext('2d');
   ctx.fillStyle = 'rgba(' + BANDWIDTH + ', ' + BANDWIDTH + ', ' + BANDWIDTH + ', 1)';
@@ -92,15 +91,19 @@ function xyToIndex(_ref2, x, y) {
   return (y * width + x) * 4;
 };
 
-function defaultCanvasFactory(width, height) {
-  if (typeof document !== 'undefined') {
-    return Object.assign(document.createElement('canvas'), { width: width, height: height });
-  } else {
-    var Canvas = require('canvas');
-    return new (Function.prototype.bind.apply(Canvas, [null].concat(Array.prototype.slice.call(arguments))))();
-  }
+function newCanvas() {
+  return newCanvas.factory.apply(this, arguments);
 };
-function setCanvasFactory(fn) {
-  setCanvasFactory.canvasFactory = fn;
+newCanvas.BROWSER_FACTORY = function (width, height) {
+  return Object.assign(document.createElement('canvas'), { width: width, height: height });
 };
-setCanvasFactory(defaultCanvasFactory);
+newCanvas.NODE_FACTORY = function () {
+  var Canvas = newCanvas.NODE_FACTORY.Canvas;
+
+  if (!Canvas) Canvas = newCanvas.NODE_FACTORY.Canvas = require('canvas');
+  return new (Function.prototype.bind.apply(Canvas, [null].concat(Array.prototype.slice.call(arguments))))();
+};
+newCanvas.DEFAULT_FACTORY = function () {
+  return typeof document !== 'undefined' ? newCanvas.BROWSER_FACTORY.apply(this, arguments) : newCanvas.NODE_FACTORY.apply(this, arguments);
+};
+newCanvas.factory = newCanvas.DEFAULT_FACTORY;

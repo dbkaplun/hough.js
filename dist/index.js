@@ -21761,9 +21761,7 @@
 	  if (!Canvas) Canvas = newCanvas.NODE_FACTORY.Canvas = __webpack_require__(173);
 	  return new (Function.prototype.bind.apply(Canvas, [null].concat(Array.prototype.slice.call(arguments))))();
 	};
-	newCanvas.DEFAULT_FACTORY = function () {
-	  return typeof document !== 'undefined' ? newCanvas.BROWSER_FACTORY.apply(this, arguments) : newCanvas.NODE_FACTORY.apply(this, arguments);
-	};
+	newCanvas.DEFAULT_FACTORY = typeof document !== 'undefined' ? newCanvas.BROWSER_FACTORY : newCanvas.NODE_FACTORY;
 	newCanvas.factory = newCanvas.DEFAULT_FACTORY;
 
 /***/ },

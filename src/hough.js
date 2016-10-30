@@ -16,8 +16,7 @@ export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
   ctx.fillRect(0, 0, outputWidth, outputHeight);
   let output = ctx.getImageData(0, 0, outputWidth, outputHeight);
 
-  let rhoMax = Math.sqrt(width*width + height*height);
-  let dRho = rhoMax / halfHeight;
+  let dRho = getRhoMax(input) / halfHeight;
   let dTh = Math.PI / outputWidth;
   for (let inputY = 0; inputY < height; inputY++) {
     for (let inputX = 0; inputX < width; inputX++) {
@@ -26,7 +25,7 @@ export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
       for (let outputX = 0; outputX < outputWidth; outputX++) {
         let th = dTh*outputX;
         let rho = inputX*Math.cos(th) + inputY*Math.sin(th);
-        let outputY = halfHeight - Math.floor(rho/dRho+.5);
+        let outputY = halfHeight - Math.round(rho/dRho);
         let outputI = xyToIndex(output, outputX, outputY);
         output.data[outputI+0]--; // r
         output.data[outputI+1]--; // g
@@ -37,6 +36,20 @@ export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
   }
 
   return output;
+};
+
+export function xyToRhoTheta (input, output, outputX, outputY) {
+  // (rho, th) determines a line in Hough space
+  // line equation is rho = cos(th)x + sin(th)y
+  return {
+    rho: getRhoMax(input)*(1 - 2*outputY/output.height),
+    th: Math.PI * outputX/output.width,
+  };
+};
+
+export function getRhoMax ({width, height}) {
+  // return Math.hypot(width, height);
+  return Math.sqrt(width*width + height*height);
 };
 
 export function thresholdByBrightness (threshold) {

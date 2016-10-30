@@ -2,7 +2,7 @@ const path = require('path');
 
 let config = {
   context: path.join(__dirname, 'src'),
-  entry: './index.js',
+  entry: './index.jsx',
 
   output: {
     path: path.join(__dirname, 'dist'),
@@ -11,7 +11,7 @@ let config = {
   module: {
     loaders: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         loader: 'babel-loader',
       },
     ],

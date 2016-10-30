@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = hough;
+exports.xyToRhoTheta = xyToRhoTheta;
+exports.getRhoMax = getRhoMax;
 exports.thresholdByBrightness = thresholdByBrightness;
 exports.brightness = brightness;
 exports.xyToIndex = xyToIndex;
@@ -35,8 +37,7 @@ function hough(input, outputSize) {
   ctx.fillRect(0, 0, outputWidth, outputHeight);
   var output = ctx.getImageData(0, 0, outputWidth, outputHeight);
 
-  var rhoMax = Math.sqrt(width * width + height * height);
-  var dRho = rhoMax / halfHeight;
+  var dRho = getRhoMax(input) / halfHeight;
   var dTh = Math.PI / outputWidth;
   for (var inputY = 0; inputY < height; inputY++) {
     for (var inputX = 0; inputX < width; inputX++) {
@@ -45,7 +46,7 @@ function hough(input, outputSize) {
       for (var outputX = 0; outputX < outputWidth; outputX++) {
         var th = dTh * outputX;
         var rho = inputX * Math.cos(th) + inputY * Math.sin(th);
-        var outputY = halfHeight - Math.floor(rho / dRho + .5);
+        var outputY = halfHeight - Math.round(rho / dRho);
         var outputI = xyToIndex(output, outputX, outputY);
         output.data[outputI + 0]--; // r
         output.data[outputI + 1]--; // g
@@ -58,6 +59,23 @@ function hough(input, outputSize) {
   return output;
 };
 
+function xyToRhoTheta(input, output, outputX, outputY) {
+  // (rho, th) determines a line in Hough space
+  // line equation is rho = cos(th)x + sin(th)y
+  return {
+    rho: getRhoMax(input) * (1 - 2 * outputY / output.height),
+    th: Math.PI * outputX / output.width
+  };
+};
+
+function getRhoMax(_ref) {
+  var width = _ref.width,
+      height = _ref.height;
+
+  // return Math.hypot(width, height);
+  return Math.sqrt(width * width + height * height);
+};
+
 function thresholdByBrightness(threshold) {
   return function () {
     return brightness.apply(undefined, arguments) > threshold;
@@ -68,8 +86,8 @@ function brightness(r, g, b, a) {
   return (r + g + b) / (3 * BANDWIDTH) * (a / BANDWIDTH);
 };
 
-function xyToIndex(_ref, x, y) {
-  var width = _ref.width;
+function xyToIndex(_ref2, x, y) {
+  var width = _ref2.width;
 
   return (y * width + x) * 4;
 };

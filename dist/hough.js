@@ -13,6 +13,7 @@ exports.newCanvas = newCanvas;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var BANDWIDTH = exports.BANDWIDTH = 255;
+var NUM_BANDS = exports.NUM_BANDS = 4;
 var DEFAULT_THRESHOLD = exports.DEFAULT_THRESHOLD = .5;
 
 // Translated from https://rosettacode.org/wiki/Hough_transform#Python
@@ -40,7 +41,7 @@ function hough(input, outputSize) {
   for (var inputY = 0; inputY < height; inputY++) {
     for (var inputX = 0; inputX < width; inputX++) {
       var inputI = xyToIndex(input, inputX, inputY);
-      if (threshold.apply(undefined, _toConsumableArray(input.data.slice(inputI, inputI + 4)))) continue;
+      if (threshold.apply(undefined, _toConsumableArray(input.data.slice(inputI, inputI + NUM_BANDS)))) continue;
       for (var outputX = 0; outputX < outputWidth; outputX++) {
         var th = dTh * outputX;
         var rho = inputX * Math.cos(th) + inputY * Math.sin(th);
@@ -86,7 +87,7 @@ brightness.threshold = function (threshold) {
 function xyToIndex(_ref2, x, y) {
   var width = _ref2.width;
 
-  return (y * width + x) * 4;
+  return (y * width + x) * NUM_BANDS;
 };
 
 function newCanvas() {

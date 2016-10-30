@@ -1,4 +1,5 @@
 export const BANDWIDTH = 255;
+export const NUM_BANDS = 4;
 export const DEFAULT_THRESHOLD = .5;
 
 // Translated from https://rosettacode.org/wiki/Hough_transform#Python
@@ -21,7 +22,7 @@ export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
   for (let inputY = 0; inputY < height; inputY++) {
     for (let inputX = 0; inputX < width; inputX++) {
       let inputI = xyToIndex(input, inputX, inputY);
-      if (threshold(...input.data.slice(inputI, inputI+4))) continue;
+      if (threshold(...input.data.slice(inputI, inputI+NUM_BANDS))) continue;
       for (let outputX = 0; outputX < outputWidth; outputX++) {
         let th = dTh*outputX;
         let rho = inputX*Math.cos(th) + inputY*Math.sin(th);
@@ -60,7 +61,7 @@ brightness.threshold = (threshold) => function () {
 };
 
 export function xyToIndex ({width}, x, y) {
-  return (y*width + x)*4;
+  return (y*width + x)*NUM_BANDS;
 };
 
 export function newCanvas () {

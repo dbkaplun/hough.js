@@ -3,7 +3,7 @@ export const DEFAULT_THRESHOLD = .5;
 
 // Translated from https://rosettacode.org/wiki/Hough_transform#Python
 export default function hough (input, outputSize, threshold=DEFAULT_THRESHOLD) {
-  if (typeof threshold === 'number') threshold = thresholdByBrightness(threshold);
+  if (typeof threshold === 'number') threshold = brightness.threshold(threshold);
 
   let {width, height, data} = input;
 
@@ -52,12 +52,11 @@ export function getRhoMax ({width, height}) {
   return Math.sqrt(width*width + height*height);
 };
 
-export function thresholdByBrightness (threshold) {
-  return (...args) => brightness(...args) > threshold;
-};
-
 export function brightness (r, g, b, a) {
   return (r+g+b)/(3*BANDWIDTH) * (a/BANDWIDTH);
+};
+brightness.threshold = (threshold) => function () {
+  return brightness.apply(this, arguments) > threshold;
 };
 
 export function xyToIndex ({width}, x, y) {

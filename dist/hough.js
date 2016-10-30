@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = hough;
 exports.xyToRhoTheta = xyToRhoTheta;
 exports.getRhoMax = getRhoMax;
-exports.thresholdByBrightness = thresholdByBrightness;
 exports.brightness = brightness;
 exports.xyToIndex = xyToIndex;
 exports.newCanvas = newCanvas;
@@ -20,7 +19,7 @@ var DEFAULT_THRESHOLD = exports.DEFAULT_THRESHOLD = .5;
 function hough(input, outputSize) {
   var threshold = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEFAULT_THRESHOLD;
 
-  if (typeof threshold === 'number') threshold = thresholdByBrightness(threshold);
+  if (typeof threshold === 'number') threshold = brightness.threshold(threshold);
 
   var width = input.width,
       height = input.height,
@@ -75,14 +74,13 @@ function getRhoMax(_ref) {
   return Math.sqrt(width * width + height * height);
 };
 
-function thresholdByBrightness(threshold) {
-  return function () {
-    return brightness.apply(undefined, arguments) > threshold;
-  };
-};
-
 function brightness(r, g, b, a) {
   return (r + g + b) / (3 * BANDWIDTH) * (a / BANDWIDTH);
+};
+brightness.threshold = function (threshold) {
+  return function () {
+    return brightness.apply(this, arguments) > threshold;
+  };
 };
 
 function xyToIndex(_ref2, x, y) {
